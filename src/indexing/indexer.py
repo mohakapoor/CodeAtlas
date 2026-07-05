@@ -1,8 +1,10 @@
 from pathlib import Path
 from src.parsing.registry import get_parser
-from src.indexing.embedder import embed_texts
-from src.indexing.chroma_store import upsert
+from src.indexing.chroma_store import upsert, delete_file
 from src.ignore_list import IGNORE_DIRS, IGNORE_EXTENSIONS, IGNORE_FILES
+
+BATCH_SIZE = 100
+
 
 def walk_repository(repo_path: Path):
     """
@@ -13,9 +15,7 @@ def walk_repository(repo_path: Path):
             continue
             
         # Check if it's inside an ignored directory
-        # path.parts returns a tuple of the path components
-        is_ignored_dir = any(ignored in path.parts for ignored in IGNORE_DIRS)
-        if is_ignored_dir:
+        if any(part in IGNORE_DIRS for part in path.parts):
             continue
             
         # Check file extension and exact name
@@ -24,51 +24,74 @@ def walk_repository(repo_path: Path):
             
         yield path
 
-def index_all_repositories():
+def index_file(repo_name: str, file_path: Path, reindex: bool = False) -> int:
     """
-    The orchestrator. Walks all cloned repos, parses them, embeds chunks, and stores in Chroma.
+    Parses a file and upserts the chunks. 
+    If reindex=True, deletes existing chunks first (useful for incremental updates).
     """
-    repos_dir = Path("knowledge_base/repos")
-    if not repos_dir.exists():
-        print("No repositories found to index.")
-        return
-        
-    for repo_path in repos_dir.iterdir():
-        if not repo_path.is_dir():
-            continue
+    parser = get_parser(file_path)
+    if parser is None:
+        return 0
+
+    try:
+        # 1. Optionally delete old chunks from ChromaDB to avoid duplicates
+        if reindex:
+            delete_file(repo_name, file_path.as_posix())
             
-        repo_name = repo_path.name
-        print(f"\nIndexing repository: {repo_name}")
+        if not file_path.exists():
+            print(f"  Removed deleted file {file_path.name} from index")
+            return 0
         
-        chunks_indexed = 0
-        
-        for file_path in walk_repository(repo_path):
-            parser = get_parser(file_path)
+        # 2. Parse the file
+        chunks = parser(file_path, repo_name)
+        if not chunks:
+            return 0
             
-            if parser is None:
-                # No parser registered for this file type
-                continue
-                
+        # 3. Upsert the new chunks
+        indexed_count = upsert(chunks)
+        print(f"  Updated {file_path.name} ({indexed_count} chunks)")
+        return indexed_count
+        
+    except Exception as e:
+        print(f"  Failed to update {file_path.name}: {e}")
+        return 0
+
+def index_repository(repo_path: Path) -> int:
+    """
+    Walks a single cloned repo, parses it, and stores the chunks in Chroma.
+    """
+    if not repo_path.exists() or not repo_path.is_dir():
+        print(f"Repository path {repo_path} is invalid.")
+        return 0
+        
+    repo_name = repo_path.name
+    print(f"\nIndexing repository: {repo_name}")
+    
+    all_chunks = []
+    
+    # 1. Parse all files and accumulate chunks
+    for file_path in walk_repository(repo_path):
+        parser = get_parser(file_path)
+        if parser is not None:
             try:
-                # Call the correct parser
                 chunks = parser(file_path, repo_name)
-                
-                if not chunks:
-                    continue
-                    
-                # Extract text for embeddings
-                texts_to_embed = [chunk.content for chunk in chunks]
-                
-                # Embed chunks
-                embeddings = embed_texts(texts_to_embed)
-                
-                # Store in ChromaDB
-                upsert(chunks, embeddings)
-                
-                chunks_indexed += len(chunks)
-                print(f"  Processed {file_path.name} ({len(chunks)} chunks)")
-                
+                if chunks:
+                    all_chunks.extend(chunks)
+                print(f"  Parsed {file_path.name}")
             except Exception as e:
-                print(f"  Failed to process {file_path.name}: {e}")
+                print(f"  Failed to parse {file_path.name}: {e}")
                 
-        print(f"Finished {repo_name}. Total chunks indexed: {chunks_indexed}")
+    # 2. Batch upsert into ChromaDB
+    chunks_indexed = 0
+    
+    for i in range(0, len(all_chunks), BATCH_SIZE):
+        batch = all_chunks[i:i + BATCH_SIZE]
+        try:
+            indexed = upsert(batch)
+            chunks_indexed += indexed
+            print(f"  Upserted batch {i//BATCH_SIZE + 1} ({indexed} chunks)")
+        except Exception as e:
+            print(f"  Failed to upsert batch {i//BATCH_SIZE + 1}: {e}")
+            
+    print(f"Finished {repo_name}. Total chunks indexed: {chunks_indexed}")
+    return chunks_indexed

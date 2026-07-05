@@ -48,7 +48,6 @@ def upsert(chunks: list[Chunk]) -> int:
 def delete_file(repo: str, path: str) -> None:
     """
     Deletes all chunks associated with a specific file from a repo.
-    Hooks directly into the underlying Chroma collection to delete by metadata.
     """
     try:
         _vectorstore.delete(
