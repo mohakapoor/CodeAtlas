@@ -1,6 +1,6 @@
 from src.parsing.pyparser import parse_py
 from src.parsing.mdparser import parse_md
-from src.parsing.txtparser import parse_text
+from src.parsing.textparser import parse_text
 
 # The Registry Pattern: Mapping extensions to their parsing functions
 PARSERS = {
