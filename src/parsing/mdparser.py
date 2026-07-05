@@ -49,7 +49,8 @@ def parse_md(file_path, repo):
             "h1": h1,
             "h2": h2,
             "symbol": h2 or h1,
-            "chunk_idx": chunk_idx
+            "chunk_idx": chunk_idx,
+            "size": len(split.page_content)
         })
         
         chunks.append(
