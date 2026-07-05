@@ -1,30 +1,22 @@
+import os
+import dotenv
 from pathlib import Path
-from src.indexing.chroma_store import get_vectorstore, upsert
-from src.parsing.pyparser import parse_py
+from src.indexing.chroma_store import get_vectorstore
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
-
-def test_retrieval():
-    # 1. Parse our local test.py file and upsert it into the DB for testing
-    print("Parsing src/parsing/test.py...")
-    chunks = parse_py(Path("src/parsing/test.py"), repo="test_repo")
+def run_interactive_rag():
+    dotenv.load_dotenv()
     
-    if chunks:
-        indexed_count = upsert(chunks)
-        print(f"Upserted {indexed_count} chunks from test.py into ChromaDB.")
-    else:
-        print("Warning: No chunks generated from test.py.")
-
-    # 2. Fetch our vector store
+    print("Initializing ChromaDB connection...")
     vector_store = get_vectorstore()
     
-    # Create a retriever that fetches the top 5 most relevant chunks
+    # We retrieve the top 5 most relevant chunks from the database
     retriever = vector_store.as_retriever(search_kwargs={"k": 5})
     
-    # 3. Initialize the LLM
+    print("Loading LLM (gemini-2.5-flash)...")
     llm = init_chat_model(
         model="gemini-2.5-flash",
         model_provider="google_genai",
@@ -32,7 +24,6 @@ def test_retrieval():
         streaming=False,
     )
     
-    # 4. Create an LCEL prompt template for RAG
     prompt = ChatPromptTemplate.from_template(
         """
         You are an expert programming assistant reading a codebase.
@@ -51,7 +42,6 @@ def test_retrieval():
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
         
-    # 5. Construct the LCEL chain
     rag_chain = (
         {
             "context": retriever | format_docs,
@@ -62,29 +52,44 @@ def test_retrieval():
         | StrOutputParser()
     )
     
-    # 6. Interactive loop
-    print("\nRAG System Ready! Type 'exit' or 'quit' to stop.")
+    print("\n" + "="*40)
+    print(" CodeAtlas RAG System Ready!")
+    print("="*40)
+    print("Type 'exit' or 'quit' to stop.\n")
+    
     while True:
         try:
-            query = input("\nAsk a question about your code: ")
+            query = input("Ask a question about your codebase: ")
             if query.lower() in ["exit", "quit"]:
+                print("Goodbye!")
                 break
+            
+            if not query.strip():
+                continue
                 
-            print("Thinking...")
-            # Note: with LCEL we pass the query string directly, not a dict with 'input'
+            print("\nThinking...")
             answer = rag_chain.invoke(query)
             
-            print("\n=== Answer ===")
+            print("\n" + "-"*40)
+            print("Answer:")
             print(answer)
-            print("\n=== Sources ===")
+            print("-"*40)
             
-            # Since the LCEL chain only outputs the final string, we fetch docs manually to show sources
+            # Fetch docs manually to show sources
+            print("Sources:")
             docs = retriever.invoke(query)
             for doc in docs:
-                print(f"- {doc.metadata.get('path', 'Unknown file')} (Chunk {doc.metadata.get('chunk_idx', '?')})")
+                repo = doc.metadata.get('repo', 'Unknown repo')
+                path = doc.metadata.get('path', 'Unknown file')
+                chunk_type = doc.metadata.get('type', 'chunk')
+                print(f"  - [{repo}] {path} ({chunk_type})")
+            print("\n")
                 
         except KeyboardInterrupt:
+            print("\nGoodbye!")
             break
+        except Exception as e:
+            print(f"\n[!] Error: {e}")
 
 if __name__ == "__main__":
-    test_retrieval()
+    run_interactive_rag()
