@@ -44,11 +44,11 @@ def parse_md(file_path, repo):
         
         meta.update({
             "type": "section",
-            "start_line": None,
-            "end_line": None,
-            "h1": h1,
-            "h2": h2,
-            "symbol": h2 or h1,
+            "start_line": "None",
+            "end_line": "None",
+            "h1": h1 or "None",
+            "h2": h2 or "None",
+            "symbol": (h2 or h1) or "None",
             "chunk_idx": chunk_idx,
             "size": len(split.page_content)
         })

@@ -50,9 +50,9 @@ def parse_py(file_path,repo):
                 meta = base_metadata.copy()
                 meta.update({
                     "type": "Module",
-                    "start_line": module_start,
-                    "end_line": module_end,
-                    "symbol": None,
+                    "start_line": module_start if module_start is not None else "None",
+                    "end_line": module_end if module_end is not None else "None",
+                    "symbol": "None",
                     "chunk_idx": chunk_idx,
                     "size": len(t)
                 })
@@ -70,7 +70,7 @@ def parse_py(file_path,repo):
                 "type": TYPE_MAP[type(node)],
                 "start_line": start,
                 "end_line": end,
-                "symbol": node.name,
+                "symbol": node.name or "None",
                 "chunk_idx": chunk_idx,
                 "size": len(node_source)
             })
@@ -94,9 +94,9 @@ def parse_py(file_path,repo):
         t = "\n".join(module_buffer)
         meta.update({
             "type": "Module",
-            "start_line": module_start,
-            "end_line": module_end,
-            "symbol": None,
+            "start_line": module_start if module_start is not None else "None",
+            "end_line": module_end if module_end is not None else "None",
+            "symbol": "None",
             "chunk_idx": chunk_idx,
             "size": len(t)
         })
