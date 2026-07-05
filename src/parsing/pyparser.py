@@ -46,7 +46,7 @@ def parse_py(file_path,repo):
                 t = "\n".join(module_buffer)
                 module_buffer.clear()
                 
-                chunk_id = f"{repo}_{relative}_{chunk_idx}"
+                chunk_id = f"{repo}:{relative}:{chunk_idx}"
                 meta = base_metadata.copy()
                 meta.update({
                     "type": "Module",
@@ -63,7 +63,7 @@ def parse_py(file_path,repo):
                 module_end = None
 
             # Print the function/class
-            chunk_id = f"{repo}_{relative}_{chunk_idx}"
+            chunk_id = f"{repo}:{relative}:{chunk_idx}"
             meta = base_metadata.copy()
             meta.update({
                 "type": TYPE_MAP[type(node)],
@@ -87,7 +87,7 @@ def parse_py(file_path,repo):
 
     # Flush any remaining module code at the end
     if module_buffer:
-        chunk_id = f"{repo}_{relative}_{chunk_idx}"
+        chunk_id = f"{repo}:{relative}:{chunk_idx}"
         meta = base_metadata.copy()
         meta.update({
             "type": "Module",
