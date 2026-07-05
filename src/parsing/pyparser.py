@@ -53,7 +53,8 @@ def parse_py(file_path,repo):
                     "start_line": module_start,
                     "end_line": module_end,
                     "symbol": None,
-                    "chunk_idx": chunk_idx
+                    "chunk_idx": chunk_idx,
+                    "size": len(t)
                 })
                 chunk_idx += 1
                 chunks.append(
@@ -70,7 +71,8 @@ def parse_py(file_path,repo):
                 "start_line": start,
                 "end_line": end,
                 "symbol": node.name,
-                "chunk_idx": chunk_idx
+                "chunk_idx": chunk_idx,
+                "size": len(node_source)
             })
             chunk_idx += 1
             
@@ -89,16 +91,18 @@ def parse_py(file_path,repo):
     if module_buffer:
         chunk_id = f"{repo}:{relative}:{chunk_idx}"
         meta = base_metadata.copy()
+        t = "\n".join(module_buffer)
         meta.update({
             "type": "Module",
             "start_line": module_start,
             "end_line": module_end,
             "symbol": None,
-            "chunk_idx": chunk_idx
+            "chunk_idx": chunk_idx,
+            "size": len(t)
         })
         chunk_idx += 1
         chunks.append(
-            Chunk(id=chunk_id, content="\n".join(module_buffer), metadata=meta)
+            Chunk(id=chunk_id, content=t, metadata=meta)
         )
 
     return chunks
