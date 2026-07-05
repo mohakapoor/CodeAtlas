@@ -2,24 +2,20 @@ import os
 import json
 import subprocess
 import requests
+from pathlib import Path
 from datetime import datetime, timezone
+from src.utils import SyncResult
 
-USERNAME = "mohakapoor"
-TOPIC = "knowledge-base"
-BASE_DIR = "knowledge_base"
-REPOS_DIR = os.path.join(BASE_DIR, "repos")
-GLOBAL_MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
-
-def run_cmd(cmd, cwd=None):
+def run_cmd(cmd: list[str], cwd: str = None) -> str:
     """Run a shell command and return its output as a string."""
     result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
     if result.returncode != 0:
         raise Exception(f"Command failed: {' '.join(cmd)}\nError: {result.stderr}")
     return result.stdout.strip()
 
-def get_repos():
+def fetch_github_repos(username: str, topic: str) -> list[dict]:
     """Fetch public repos for the user that have the target topic."""
-    url = f"https://api.github.com/users/{USERNAME}/repos"
+    url = f"https://api.github.com/users/{username}/repos"
     headers = {"Accept": "application/vnd.github+json"}
     repos = []
     page = 1
@@ -30,12 +26,12 @@ def get_repos():
         if not data:
             break
         for repo in data:
-            if not repo.get('private', False) and TOPIC in repo.get('topics', []):
+            if not repo.get('private', False) and topic in repo.get('topics', []):
                 repos.append(repo)
         page += 1
     return repos
 
-def get_available_branches(repo_path):
+def get_available_branches(repo_path: str) -> list[str]:
     """Get all available remote branches in the repository."""
     try:
         output = run_cmd(["git", "branch", "-r"], cwd=repo_path)
@@ -51,113 +47,145 @@ def get_available_branches(repo_path):
         print(f"Warning: Could not fetch branches for {repo_path}: {e}")
         return []
 
-def sync_repo(repo):
-    """Sync a single repository (clone or pull)."""
+def get_changed_files(repo_path: str, old_sha: str, new_sha: str) -> list[str]:
+    """
+    Returns a list of changed files between two commits.
+    If old_sha is empty, implies everything is changed.
+    """
+    if not old_sha:
+        return ["*"]
+    if old_sha == new_sha:
+        return []
+    
+    try:
+        # --name-only returns just the file paths that changed
+        output = run_cmd(["git", "diff", "--name-only", old_sha, new_sha], cwd=repo_path)
+        return [f.strip() for f in output.split('\n') if f.strip()]
+    except Exception as e:
+        print(f"Warning: Could not compute git diff for {repo_path}: {e}")
+        return ["*"]
+
+def clone_repository(clone_url: str, repo_path: str, default_branch: str) -> tuple[str, str]:
+    """
+    Clones a repository and checks out the appropriate branch.
+    Returns (tracked_branch, current_sha).
+    """
+    print(f"[+] Cloning new repository...")
+    run_cmd(["git", "clone", clone_url, repo_path])
+    
+    branches = get_available_branches(repo_path)
+    tracked_branch = default_branch
+    
+    if "prod" in branches:
+        run_cmd(["git", "checkout", "prod"], cwd=repo_path)
+        tracked_branch = "prod"
+    elif tracked_branch in branches:
+        run_cmd(["git", "checkout", tracked_branch], cwd=repo_path)
+        
+    current_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_path)
+    return tracked_branch, current_sha
+
+def pull_repository(repo_path: str, tracked_branch: str) -> tuple[str, str]:
+    """
+    Pulls latest changes for an existing repository.
+    Returns (old_sha, current_sha).
+    """
+    print(f"[*] Syncing existing repository (branch: {tracked_branch})...")
+    old_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_path)
+    print(f"    Pulling latest changes...")
+    run_cmd(["git", "pull", "origin", tracked_branch], cwd=repo_path)
+    current_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_path)
+    return old_sha, current_sha
+
+def sync_single_repo(repo: dict, username: str, base_dir: str) -> tuple[str, dict, list[str]]:
+    """
+    Manages the sync flow for one repository.
+    Returns (status, global_entry, changed_files).
+    """
     repo_name = repo['name']
     clone_url = repo['clone_url']
-    repo_path = os.path.join(REPOS_DIR, repo_name)
+    repos_dir = os.path.join(base_dir, "repos")
+    repo_path = os.path.join(repos_dir, repo_name)
     manifest_path = os.path.join(repo_path, "manifest.json")
     
-    # Use primary language for now to avoid N+1 API calls; full extraction can happen during indexing
     primary_lang = repo.get('language')
     languages = [primary_lang] if primary_lang else []
-    
     now = datetime.now(timezone.utc).isoformat()
     
-    status = "unchanged"
-    requires_reindex = False
     tracked_branch = repo['default_branch']
-    current_sha = ""
-    
     is_new = not os.path.exists(repo_path)
     
+    # Load existing manifest if present
+    manifest = {}
+    if not is_new and os.path.exists(manifest_path):
+        with open(manifest_path, 'r') as f:
+            try:
+                manifest = json.load(f)
+            except json.JSONDecodeError:
+                pass
+        tracked_branch = manifest.get('tracked_branch', tracked_branch)
+    
+    old_sha = ""
+    status = "unchanged"
+    
+    # Clone or Pull
     if is_new:
-        print(f"[+] Cloning new repository: {repo_name}...")
-        run_cmd(["git", "clone", clone_url, repo_path])
-        
-        branches = get_available_branches(repo_path)
-        if "prod" in branches:
-            run_cmd(["git", "checkout", "prod"], cwd=repo_path)
-            tracked_branch = "prod"
-        elif tracked_branch in branches:
-            run_cmd(["git", "checkout", tracked_branch], cwd=repo_path)
-            
-        current_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_path)
+        tracked_branch, current_sha = clone_repository(clone_url, repo_path, tracked_branch)
         status = "newly_cloned"
-        requires_reindex = True
-        
-        manifest = {
-            "repository_name": repo_name,
-            "owner": USERNAME,
-            "tracked_branch": tracked_branch,
-            "current_commit_sha": current_sha,
-            "available_branches": branches,
-            "topics": repo.get('topics', []),
-            "languages": languages,
-            "last_sync_timestamp": now,
-            "last_index_timestamp": None
-        }
     else:
-        print(f"[*] Syncing existing repository: {repo_name}...")
-        # read existing manifest to get tracked branch if exists
-        manifest = {}
-        if os.path.exists(manifest_path):
-            with open(manifest_path, 'r') as f:
-                try:
-                    manifest = json.load(f)
-                except json.JSONDecodeError:
-                    pass
-            tracked_branch = manifest.get('tracked_branch', tracked_branch)
-            
-        old_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_path)
-        print(f"    Pulling latest changes on branch '{tracked_branch}'...")
-        run_cmd(["git", "pull", "origin", tracked_branch], cwd=repo_path)
-        current_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_path)
-        
-        branches = get_available_branches(repo_path)
-        
+        old_sha, current_sha = pull_repository(repo_path, tracked_branch)
         if old_sha != current_sha:
             status = "updated"
-            requires_reindex = True
             print(f"    Changes detected ({old_sha[:7]} -> {current_sha[:7]}).")
         else:
-            status = "unchanged"
             print("    No new changes.")
             
-        # Update manifest
-        manifest.update({
-            "repository_name": repo_name,
-            "owner": USERNAME,
-            "tracked_branch": tracked_branch,
-            "current_commit_sha": current_sha,
-            "available_branches": branches,
-            "topics": repo.get('topics', []),
-            "languages": languages,
-            "last_sync_timestamp": now
-        })
-        
+    # Compute Diff
+    changed_files = get_changed_files(repo_path, old_sha, current_sha)
+    
+    branches = get_available_branches(repo_path)
+    
+    # Update Manifest
+    manifest.update({
+        "repository_name": repo_name,
+        "owner": username,
+        "tracked_branch": tracked_branch,
+        "current_commit_sha": current_sha,
+        "available_branches": branches,
+        "topics": repo.get('topics', []),
+        "languages": languages,
+        "last_sync_timestamp": now
+    })
+    
     with open(manifest_path, 'w') as f:
         json.dump(manifest, f, indent=2)
         
+    # Prepare global manifest entry
     global_entry = {
         "name": repo_name,
-        "local_path": os.path.relpath(repo_path, BASE_DIR).replace('\\', '/'),
-        "manifest_path": os.path.relpath(manifest_path, BASE_DIR).replace('\\', '/'),
+        "local_path": os.path.relpath(repo_path, base_dir).replace('\\', '/'),
+        "manifest_path": os.path.relpath(manifest_path, base_dir).replace('\\', '/'),
         "tracked_branch": tracked_branch,
         "current_commit_sha": current_sha,
         "last_sync_timestamp": now
     }
     
-    return status, requires_reindex, global_entry
+    return status, global_entry, changed_files
 
-def main():
-    print(f"Starting synchronization for user '{USERNAME}' (topic: '{TOPIC}')")
+def sync_repositories(username: str, topic: str, base_dir: str = "knowledge_base") -> list[SyncResult]:
+    """
+    The main orchestrator. Fetches GitHub repos, syncs them all, 
+    and returns a list of repo names that require re-indexing.
+    """
+    print(f"Starting synchronization for user '{username}' (topic: '{topic}')")
     
-    # Create necessary base directories
-    os.makedirs(BASE_DIR, exist_ok=True)
-    os.makedirs(REPOS_DIR, exist_ok=True)
+    repos_dir = os.path.join(base_dir, "repos")
+    global_manifest_path = os.path.join(base_dir, "manifest.json")
     
-    repos = get_repos()
+    os.makedirs(base_dir, exist_ok=True)
+    os.makedirs(repos_dir, exist_ok=True)
+    
+    repos = fetch_github_repos(username, topic)
     print(f"Discovered {len(repos)} repositories matching criteria.\n")
     
     summary = {
@@ -173,17 +201,34 @@ def main():
         "repositories": []
     }
     
+    sync_results = []
+    
     for repo in repos:
+        repo_name = repo['name']
+        print(f"\nProcessing {repo_name}...")
         try:
-            status, req_reindex, global_entry = sync_repo(repo)
+            status, global_entry, changed_files = sync_single_repo(repo, username, base_dir)
+            
             summary[status] += 1
-            if req_reindex:
+            if status in ["newly_cloned", "updated"]:
                 summary["requires_reindex"] += 1
+                
+                # Create a rich SyncResult for ingest.py to consume
+                # We only append repos that actually have changes!
+                sync_results.append(
+                    SyncResult(
+                        repo_name=repo_name,
+                        repo_path=Path(base_dir) / "repos" / repo_name,
+                        status=status,
+                        changed_files=changed_files
+                    )
+                )
+                
             global_manifest_data["repositories"].append(global_entry)
         except Exception as e:
-            print(f"[!] Error syncing {repo['name']}: {e}")
+            print(f"[!] Error syncing {repo_name}: {e}")
             
-    with open(GLOBAL_MANIFEST_PATH, 'w') as f:
+    with open(global_manifest_path, 'w') as f:
         json.dump(global_manifest_data, f, indent=2)
         
     print("\n--- Synchronization Summary ---")
@@ -193,6 +238,19 @@ def main():
     print(f"Unchanged repositories:        {summary['unchanged']}")
     print(f"Repositories req. re-indexing: {summary['requires_reindex']}")
     print("-------------------------------")
+    
+    return sync_results
+
+def main():
+    # Example local test execution
+    import dotenv
+    dotenv.load_dotenv()
+    
+    # You would typically pass these in from your orchestrator
+    test_user = "mohakapoor"
+    test_topic = "knowledge-base"
+    
+    sync_repositories(test_user, test_topic)
 
 if __name__ == "__main__":
     main()
