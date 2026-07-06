@@ -20,33 +20,40 @@ def main():
     total_chunks = 0
     total_files = 0
     total_repos = len(sync_results)
-    
-    # Step 2: Route ingestion based on SyncResult
+                
+    from src.github.manifest import update_manifest_queue
     from src.indexing.chroma_store import delete_file
     
     for result in sync_results:
         print(f"\nEvaluating ingestion for {result.repo_name}...")
         
-        if result.status == "newly_cloned":
+        if result.changed_files == ["*"]:
             # Bulk index everything
             chunks, files = index_repository(result.repo_path)
             total_chunks += chunks
             total_files += files
+            update_manifest_queue(result.repo_path, clear_all=True)
             
         elif result.changed_files:
             # Incremental single-file indexing
-            print(f"Routing {len(result.changed_files)} changed files to incremental indexer...")
+            print(f"Routing {len(result.changed_files)} pending files to incremental indexer...")
             for file_rel_path in result.changed_files:
                 abs_path = result.repo_path / file_rel_path
                 
-                if abs_path.exists():
-                    chunks, files = index_file(result.repo_name, abs_path, reindex=True)
-                    total_chunks += chunks
-                    total_files += files
-                else:
-                    # File was deleted in git pull
-                    delete_file(result.repo_name, abs_path.as_posix())
-                    print(f"  Removed deleted file {file_rel_path} from index")
+                try:
+                    if abs_path.exists():
+                        chunks, files = index_file(result.repo_name, abs_path, reindex=True)
+                        total_chunks += chunks
+                        total_files += files
+                    else:
+                        # File was deleted in git pull
+                        delete_file(result.repo_name, abs_path.as_posix())
+                        print(f"  Removed deleted file {file_rel_path} from index")
+                        
+                    # Pop from the queue immediately after success
+                    update_manifest_queue(result.repo_path, file_to_remove=file_rel_path)
+                except Exception as e:
+                    print(f"  Error processing {file_rel_path}: {e}")
                     
     elapsed = time.time() - start_time
     
