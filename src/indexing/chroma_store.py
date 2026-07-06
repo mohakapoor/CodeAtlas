@@ -1,15 +1,15 @@
 import os
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from src.utils import Chunk
 
 # Load environment variables from .env file
 load_dotenv()
 
 # 1. Initialize once globally so we aren't reconnecting on every upsert
-_embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-2" # User confirmed this model string
+_embeddings = HuggingFaceEmbeddings(
+    model_name="all-MiniLM-L6-v2"
 )
 
 _vectorstore = Chroma(
