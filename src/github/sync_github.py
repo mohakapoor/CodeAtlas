@@ -5,6 +5,7 @@ import requests
 from pathlib import Path
 from datetime import datetime, timezone
 from src.utils import SyncResult
+from src.github.manifest import load_manifest, save_manifest
 
 def run_cmd(cmd: list[str], cwd: str = None) -> str:
     """Run a shell command and return its output as a string."""
@@ -116,32 +117,36 @@ def sync_single_repo(repo: dict, username: str, base_dir: str) -> tuple[str, dic
     is_new = not os.path.exists(repo_path)
     
     # Load existing manifest if present
-    manifest = {}
-    if not is_new and os.path.exists(manifest_path):
-        with open(manifest_path, 'r') as f:
-            try:
-                manifest = json.load(f)
-            except json.JSONDecodeError:
-                pass
+    manifest = load_manifest(repo_path)
+    if not is_new:
         tracked_branch = manifest.get('tracked_branch', tracked_branch)
-    
-    old_sha = ""
-    status = "unchanged"
+        
+    old_sha = manifest.get('current_commit_sha', "")
+    indexed_commit_sha = manifest.get('indexed_commit_sha', "")
+    index_queue = manifest.get('index_queue', [])
     
     # Clone or Pull
     if is_new:
         tracked_branch, current_sha = clone_repository(clone_url, repo_path, tracked_branch)
-        status = "newly_cloned"
+        index_queue = ["*"]
     else:
-        old_sha, current_sha = pull_repository(repo_path, tracked_branch)
+        _, current_sha = pull_repository(repo_path, tracked_branch)
         if old_sha != current_sha:
-            status = "updated"
             print(f"    Changes detected ({old_sha[:7]} -> {current_sha[:7]}).")
+            if index_queue != ["*"]:
+                diff_files = get_changed_files(repo_path, old_sha, current_sha)
+                index_queue = list(set(index_queue + diff_files))
         else:
-            print("    No new changes.")
+            print("    No new commits.")
             
-    # Compute Diff
-    changed_files = get_changed_files(repo_path, old_sha, current_sha)
+    if is_new:
+        status = "newly_cloned"
+    elif index_queue:
+        status = "updated"
+    else:
+        status = "unchanged"
+        
+    changed_files = index_queue
     
     branches = get_available_branches(repo_path)
     
@@ -151,14 +156,15 @@ def sync_single_repo(repo: dict, username: str, base_dir: str) -> tuple[str, dic
         "owner": username,
         "tracked_branch": tracked_branch,
         "current_commit_sha": current_sha,
+        "indexed_commit_sha": indexed_commit_sha,
+        "index_queue": index_queue,
         "available_branches": branches,
         "topics": repo.get('topics', []),
         "languages": languages,
         "last_sync_timestamp": now
     })
     
-    with open(manifest_path, 'w') as f:
-        json.dump(manifest, f, indent=2)
+    save_manifest(repo_path, manifest)
         
     # Prepare global manifest entry
     global_entry = {
