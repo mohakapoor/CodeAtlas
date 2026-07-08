@@ -2,6 +2,7 @@ import os
 import dotenv
 from pathlib import Path
 from src.indexing.chroma_store import get_vectorstore
+from src.retrieval.retrievers import SplitAndCombineRetriever
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -10,11 +11,13 @@ from langchain_core.output_parsers import StrOutputParser
 def run_interactive_rag():
     dotenv.load_dotenv()
     
-    print("Initializing ChromaDB connection...")
-    vector_store = get_vectorstore()
+    print("Initializing Split & Combine Retriever...")
+    # Fetch 3 code chunks and 2 documentation chunks
+    base_retriever = SplitAndCombineRetriever(code_k=3, doc_k=2)
     
-    # We retrieve the top 5 most relevant chunks from the database
-    retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+    # Wrap it in a RunnableLambda to make it compatible with LangChain LCEL
+    from langchain_core.runnables import RunnableLambda
+    retriever = RunnableLambda(lambda q: base_retriever.retrieve(q))
     
     print("Loading LLM (gemini-2.5-flash)...")
     llm = init_chat_model(
@@ -77,7 +80,7 @@ def run_interactive_rag():
             
             # Fetch docs manually to show sources
             print("Sources:")
-            docs = retriever.invoke(query)
+            docs = base_retriever.retrieve(query)
             for doc in docs:
                 repo = doc.metadata.get('repo', 'Unknown repo')
                 path = doc.metadata.get('path', 'Unknown file')
