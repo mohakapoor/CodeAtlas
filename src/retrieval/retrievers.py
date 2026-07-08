@@ -39,12 +39,40 @@ class MMRRetriever(BaseRetriever):
 
 class CodeOnlyRetriever(BaseRetriever):
     """
-    A retriever that uses metadata filtering to strictly exclude README.md files,
-    ensuring that only actual source code or other documentation is retrieved.
+    A retriever that uses metadata filtering to strictly exclude markdown and text files,
+    ensuring that only actual source code is retrieved.
     """
     def retrieve(self, query: str, k: int = 5):
         return self.vectorstore.similarity_search(
             query, 
             k=k, 
-            filter={"filename": {"$ne": "README.md"}}
+            filter={"language": {"$nin": ["markdown", "text"]}}
         )
+
+class SplitAndCombineRetriever(BaseRetriever):
+    """
+    Executes two separate searches to guarantee a balanced context window:
+    one strict code search, and one strict documentation search.
+    """
+    def __init__(self, code_k: int = 3, doc_k: int = 2):
+        super().__init__()
+        self.code_k = code_k
+        self.doc_k = doc_k
+
+    def retrieve(self, query: str, k: int = 5):
+        # The 'k' argument here is ignored since we use the pre-configured code_k and doc_k,
+        # but we keep it in the signature to match the BaseRetriever interface.
+        
+        code_results = self.vectorstore.similarity_search(
+            query, 
+            k=self.code_k, 
+            filter={"language": {"$nin": ["markdown", "text"]}}
+        )
+        
+        doc_results = self.vectorstore.similarity_search(
+            query, 
+            k=self.doc_k, 
+            filter={"language": {"$in": ["markdown", "text"]}}
+        )
+        
+        return code_results + doc_results
