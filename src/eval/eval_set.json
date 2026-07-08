@@ -1,0 +1,366 @@
+[
+    {
+        "id": 1,
+        "category": "symbol_lookup",
+        "repo": "CaptchaOCR",
+        "query": "Where is synthetic Dataset generated?",
+        "path": "src/generateCaptcha.py"
+    },
+    {
+        "id": 2,
+        "category": "symbol_lookup",
+        "repo": "CaptchaOCR",
+        "query": "Where are different image transformations implemented",
+        "path": "src/data.py"
+    },
+    {
+        "id": 3,
+        "category": "symbol_lookup",
+        "repo": "CaptchaOCR",
+        "query": "Where id dataloader fronted for my ocr project implemented",
+        "path": "src/data.py"
+    },
+    {
+        "id": 4,
+        "category": "symbol_lookup",
+        "repo": "CaptchaOCR",
+        "query": "How is ctc collate handled?",
+        "path": "src/collate.py"
+    },
+    {
+        "id": 5,
+        "category": "symbol_lookup",
+        "repo": "HermesGPT",
+        "query": "where am i calling gemini api?",
+        "path": "hermesgpt.py"
+    },
+    {
+        "id": 6,
+        "category": "symbol_lookup",
+        "repo": "IntrusionBackend",
+        "query": "Where do i handle logic of ensemble decision making of multiple intrusion detection models?",
+        "path": "predict.py"
+    },
+    {
+        "id": 7,
+        "category": "symbol_lookup",
+        "repo": "IntrusionBackend",
+        "query": "have i handled multiple workers on the backend",
+        "path": "router.py"
+    },
+    {
+        "id": 8,
+        "category": "symbol_lookup",
+        "repo": "CaptchaOCR",
+        "query": "How is vocabulary generated and can be made better",
+        "path": "src/generateCaptcha.py"
+    },
+    {
+        "id": 9,
+        "category": "symbol_lookup",
+        "repo": "IntrusionBackend",
+        "query": "Have i handled database samplers for any of my project if yes how have i handled them",
+        "path": "utils.py"
+    },
+    {
+        "id": 10,
+        "category": "symbol_lookup",
+        "repo": "IntrusionBackend",
+        "query": "How do i handle auth what method do i use?",
+        "path": "router.py"
+    },
+    {
+        "id": 11,
+        "category": "documentation",
+        "repo": "CaptchaOCR",
+        "query": "Where can i live demo this project at?",
+        "path": "README.md"
+    },
+    {
+        "id": 12,
+        "category": "documentation",
+        "repo": "CaptchaOCR",
+        "query": "Which project is about OCR",
+        "path": "README.md"
+    },
+    {
+        "id": 13,
+        "category": "documentation",
+        "repo": "CaptchaOCR",
+        "query": "How do I run this project on my local machine",
+        "path": "README.md"
+    },
+    {
+        "id": 14,
+        "category": "documentation",
+        "repo": "CaptchaOCR",
+        "query": "Do i have a project that handles real life captured images?",
+        "path": "README.md"
+    },
+    {
+        "id": 15,
+        "category": "documentation",
+        "repo": "IntrusionBackend",
+        "query": "How do i get my fastapi project to run?",
+        "path": "README.md"
+    },
+    {
+        "id": 16,
+        "category": "documentation",
+        "repo": "IntrusionBackend",
+        "query": "If tomorrow i built a new model for intrusion backend how would i add it?",
+        "path": "README.md"
+    },
+    {
+        "id": 17,
+        "category": "documentation",
+        "repo": "IntrusionBackend",
+        "query": "What is the architecture of Intrusion Backend and how do the diff modules interact",
+        "path": "README.md"
+    },
+    {
+        "id": 18,
+        "category": "documentation",
+        "repo": "CaptchaOCR",
+        "query": "How do I install CaptchaOCR?",
+        "path": "README.md"
+    },
+    {
+        "id": 19,
+        "category": "documentation",
+        "repo": "IntrusionBackend",
+        "query": "What Python version does IntrusionBackend require?",
+        "path": "README.md"
+    },
+    {
+        "id": 20,
+        "category": "documentation",
+        "repo": "IntrusionBackend",
+        "query": "How do I contribute to IntrusionBackend?",
+        "path": "README.md"
+    },
+    {
+        "id": 21,
+        "category": "repository_recommendation",
+        "repo": "CaptchaOCR",
+        "query": "Which project uses pytorch",
+        "path": "train.py"
+    },
+    {
+        "id": 22,
+        "category": "repository_recommendation",
+        "repo": "HermesGPT",
+        "query": "I wanted to mass send mails do i have a project for that?",
+        "path": "hermesgpt.py"
+    },
+    {
+        "id": 23,
+        "category": "repository_recommendation",
+        "repo": "IntrusionBackend",
+        "query": "I wanna build a fastapi for this new Pothole scanning project im building do i have a project i can use for reference",
+        "path": "router.py"
+    },
+    {
+        "id": 24,
+        "category": "repository_recommendation",
+        "repo": "CaptchaOCR",
+        "query": "I need an OCR project.",
+        "path": "README.md"
+    },
+    {
+        "id": 25,
+        "category": "repository_recommendation",
+        "repo": "IntrusionBackend",
+        "query": "I need a FastAPI template.",
+        "path": "router.py"
+    },
+    {
+        "id": 26,
+        "category": "repository_recommendation",
+        "repo": "HermesGPT",
+        "query": "I need an email automation project.",
+        "path": "hermesgpt.py"
+    },
+    {
+        "id": 27,
+        "category": "repository_recommendation",
+        "repo": "IntrusionBackend",
+        "query": "I need a websocket implementation.",
+        "path": "router.py"
+    },
+    {
+        "id": 28,
+        "category": "repository_recommendation",
+        "repo": "CaptchaOCR",
+        "query": "I need a PyTorch training pipeline.",
+        "path": "train.py"
+    },
+    {
+        "id": 29,
+        "category": "configuration",
+        "repo": "IntrusionBackend",
+        "query": "What are the allowed Origins for my IntrusionBackend Project?",
+        "path": "cors.py"
+    },
+    {
+        "id": 30,
+        "category": "configuration",
+        "repo": "IntrusionBackend",
+        "query": "Where are CORS origins configured?",
+        "path": "cors.py"
+    },
+    {
+        "id": 31,
+        "category": "configuration",
+        "repo": "IntrusionBackend",
+        "query": "Where are environment variables loaded?",
+        "path": "docker-compose.yml"
+    },
+    {
+        "id": 32,
+        "category": "configuration",
+        "repo": "IntrusionBackend",
+        "query": "Where is Docker configured for the backend?",
+        "path": "dockerfile"
+    },
+    {
+        "id": 33,
+        "category": "configuration",
+        "repo": null,
+        "query": "Where is GitHub Actions defined?",
+        "path": null
+    },
+    {
+        "id": 34,
+        "category": "configuration",
+        "repo": "IntrusionBackend",
+        "query": "Where is logging configured?",
+        "path": "utils.py"
+    },
+    {
+        "id": 35,
+        "category": "configuration",
+        "repo": "HermesGPT",
+        "query": "Do i have rate limits implemented somewhere for emails",
+        "path": "hermesgpt.py"
+    },
+    {
+        "id": 36,
+        "category": "architecture",
+        "repo": "CaptchaOCR",
+        "query": "How does the inference work?",
+        "path": "inference.py"
+    },
+    {
+        "id": 37,
+        "category": "architecture",
+        "repo": "IntrusionBackend",
+        "query": "How does live websocketing work in my projects",
+        "path": "router.py"
+    },
+    {
+        "id": 38,
+        "category": "architecture",
+        "repo": "CaptchaOCR",
+        "query": "How does an image travel from upload to prediction?",
+        "path": "inference.py"
+    },
+    {
+        "id": 39,
+        "category": "architecture",
+        "repo": "IntrusionBackend",
+        "query": "How are websocket clients managed?",
+        "path": "router.py"
+    },
+    {
+        "id": 40,
+        "category": "architecture",
+        "repo": "CaptchaOCR",
+        "query": "How does the training pipeline work?",
+        "path": "train.py"
+    },
+    {
+        "id": 41,
+        "category": "negative",
+        "repo": null,
+        "query": "Do I have a Rust project?",
+        "path": null
+    },
+    {
+        "id": 42,
+        "category": "negative",
+        "repo": null,
+        "query": "Do I use Kubernetes?",
+        "path": null
+    },
+    {
+        "id": 43,
+        "category": "negative",
+        "repo": null,
+        "query": "Do I use Redis Streams?",
+        "path": null
+    },
+    {
+        "id": 44,
+        "category": "negative",
+        "repo": null,
+        "query": "Have I implemented GraphQL?",
+        "path": null
+    },
+    {
+        "id": 45,
+        "category": "multi_repo",
+        "repo": "IntrusionBackend",
+        "query": "Which of my repositories use FastAPI?",
+        "path": "router.py"
+    },
+    {
+        "id": 46,
+        "category": "multi_repo",
+        "repo": "HermesGPT",
+        "query": "Which projects use Gemini?",
+        "path": "hermesgpt.py"
+    },
+    {
+        "id": 47,
+        "category": "multi_repo",
+        "repo": "CaptchaOCR",
+        "query": "Which projects use PyTorch?",
+        "path": "train.py"
+    },
+    {
+        "id": 48,
+        "category": "multi_repo",
+        "repo": "IntrusionBackend",
+        "query": "Which projects expose REST APIs?",
+        "path": "router.py"
+    },
+    {
+        "id": 49,
+        "category": "identifier",
+        "repo": "CaptchaOCR",
+        "query": "generateCaptcha",
+        "path": "src/generateCaptcha.py"
+    },
+    {
+        "id": 50,
+        "category": "identifier",
+        "repo": "CaptchaOCR",
+        "query": "CaptchaDataset",
+        "path": "src/data.py"
+    },
+    {
+        "id": 51,
+        "category": "identifier",
+        "repo": "IntrusionBackend",
+        "query": "predict_intrusion",
+        "path": "predict.py"
+    },
+    {
+        "id": 52,
+        "category": "identifier",
+        "repo": "HermesGPT",
+        "query": "HermesGPT",
+        "path": "hermesgpt.py"
+    }
+]
