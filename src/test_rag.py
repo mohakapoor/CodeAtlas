@@ -15,13 +15,12 @@ def run_interactive_rag():
     # Fetch 3 code chunks and 2 documentation chunks
     base_retriever = SplitAndCombineRetriever(code_k=3, doc_k=2)
     
-    # Wrap it in a RunnableLambda to make it compatible with LangChain LCEL
     from langchain_core.runnables import RunnableLambda
     retriever = RunnableLambda(lambda q: base_retriever.retrieve(q))
     
     print("Loading LLM (gemini-2.5-flash)...")
     llm = init_chat_model(
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         model_provider="google_genai",
         temperature=0.2,
         streaming=False,
