@@ -38,13 +38,10 @@ def evaluate_retrieval():
         expected_path = test_case["path"]
         target_repos = test_case["repo"]
         
-        # We can add a filter to only search within the target repo, 
-        # or we can search globally to make it a harder, more realistic test!
-        # Here we'll search globally to test how well it distinguishes repos.
+
         results = retriever.retrieve(query, k=3)
         
         # Extract the retrieved paths
-        # Note: metadata contains 'path' and 'repo'
         retrieved_docs = []
         for doc in results:
             doc_repo = doc.metadata.get("repo", "")
