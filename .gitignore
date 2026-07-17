@@ -10,3 +10,4 @@ wheels/
 .venv
 .env
 knowledge_base/
+project_details.md
