@@ -6,7 +6,8 @@
             "CaptchaOCR"
         ],
         "query": "Where is synthetic Captcha Dataset class written?",
-        "path": "src/generateCaptcha.py"
+        "path": "src/generateCaptcha.py",
+        "ground_truth": "The utility functions for generating synthetic CAPTCHA images are located in src/generateCaptcha.py."
     },
     {
         "id": 2,
@@ -15,7 +16,8 @@
             "CaptchaOCR"
         ],
         "query": "Where are different image transformations implemented",
-        "path": "src/data.py"
+        "path": "src/data.py",
+        "ground_truth": "Image transformations and augmentations, such as perspective warping, interference lines, blurring, and JPEG artifacts, are implemented in src/data.py."
     },
     {
         "id": 3,
@@ -24,7 +26,8 @@
             "CaptchaOCR"
         ],
         "query": "Where is dataloader  for my ocr project used",
-        "path": "train.py"
+        "path": "train.py",
+        "ground_truth": "The PyTorch DataLoader is used in train.py to create the train_dl and val_dl iterators, which feed batched data into the training and validation loops."
     },
     {
         "id": 4,
@@ -33,7 +36,8 @@
             "CaptchaOCR"
         ],
         "query": "How is ctc collate handled?",
-        "path": "src/collate.py"
+        "path": "src/collate.py",
+        "ground_truth": "The ctc_collate function in src/collate.py handles batching by stacking the image tensors, encoding text labels into a flattened 1D tensor (targets_flat), and calculating the target_lengths and input_lengths required by the CTC loss function."
     },
     {
         "id": 5,
@@ -42,7 +46,8 @@
             "HermesGPT"
         ],
         "query": "where am i calling gemini api?",
-        "path": "hermesgpt.py"
+        "path": "hermesgpt.py",
+        "ground_truth": "The Gemini API is called in hermesgpt.py using chat.send_message(). It is called inside the model_loading function to ingest a resume, and inside the initial_outreach function to generate the cold email body."
     },
     {
         "id": 6,
@@ -51,7 +56,8 @@
             "IntrusionBackend"
         ],
         "query": "Where do i handle logic of ensemble decision making of multiple intrusion detection models?",
-        "path": "predict.py"
+        "path": "predict.py",
+        "ground_truth": "Ensemble decision-making is handled in predict.py within the predict_attack and predict_attack_by_idx functions. The system first checks unsupervised models (Autoencoder and Isolation Forest), and if an anomaly is flagged, it evaluates supervised models, placing the final decision weight primarily on LightGBM."
     },
     {
         "id": 7,
@@ -60,7 +66,8 @@
             "IntrusionBackend"
         ],
         "query": "have i handled multiple workers on the IntrusionBackend",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "Yes, multiple workers are handled in router.py. The application is started using Uvicorn with the workers=4 parameter, enabling 4 worker processes."
     },
     {
         "id": 8,
@@ -69,7 +76,8 @@
             "CaptchaOCR"
         ],
         "query": "How is vocabulary generated and can be made better",
-        "path": "src/generateCaptcha.py"
+        "path": "src/generateCaptcha.py",
+        "ground_truth": "In src/generateCaptcha.py, the vocabulary is defined statically using string.ascii_letters + string.digits. It generates random alphanumeric strings. It could be improved by injecting real dictionary words or incorporating special characters to better simulate real-world captchas."
     },
     {
         "id": 9,
@@ -78,7 +86,8 @@
             "IntrusionBackend"
         ],
         "query": "Have i handled database samplers for any of my project if yes how have i handled them",
-        "path": "utils.py"
+        "path": "utils.py",
+        "ground_truth": "Yes, data sampling is handled in utils.py for the IntrusionBackend project. Instead of a traditional database, it loads a parquet file (unscaled_test.parquet) into memory using the polars library and provides functions like sampler() to fetch random rows by class, or sample_by_index() to fetch specific rows."
     },
     {
         "id": 10,
@@ -87,7 +96,8 @@
             "IntrusionBackend"
         ],
         "query": "How do i handle auth what method do i use?",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "Authentication is handled in router.py using Bearer tokens (FastAPI HTTPBearer). The verify_token dependency checks if the provided credentials match the TOKEN environment variable. For WebSockets, the token is passed in the initial JSON payload."
     },
     {
         "id": 11,
@@ -96,7 +106,8 @@
             "CaptchaOCR"
         ],
         "query": "Where can i live demo this project at?",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "There is no live demo link provided in the CaptchaOCR README. The README only provides instructions on how to run it locally or on Colab."
     },
     {
         "id": 12,
@@ -105,7 +116,8 @@
             "CaptchaOCR"
         ],
         "query": "Which project is about OCR",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "The CaptchaOCR project is about Optical Character Recognition (OCR). It implements an end-to-end system using a CRNN (CNN + RNN) architecture to recognize text in CAPTCHA images."
     },
     {
         "id": 13,
@@ -113,8 +125,9 @@
         "repo": [
             "CaptchaOCR"
         ],
-        "query": "How do I run this project on my local machine",
-        "path": "README.md"
+        "query": "How do I run this Captcha project on my local machine",
+        "path": "README.md",
+        "ground_truth": "To run CaptchaOCR locally, first install PyTorch and other dependencies (captcha, pandas, pillow). Then, generate the dataset by running python data.py inside the src folder. Finally, run python train.py to start training, or python inference.py for testing the model."
     },
     {
         "id": 14,
@@ -123,7 +136,8 @@
             "CaptchaOCR"
         ],
         "query": "Do i have a project that handles real life captured images?",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "Based on the CaptchaOCR README, the project uses synthetic data generation to train the model, not real-life captured images."
     },
     {
         "id": 15,
@@ -132,16 +146,18 @@
             "IntrusionBackend"
         ],
         "query": "How do i get my fastapi project to run?",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "To run the IntrusionBackend project, it is recommended to use Docker. First, copy the .env.example to .env and fill in your token. Then, run docker-compose up --build to start the FastAPI server on http://localhost:8000."
     },
     {
         "id": 16,
-        "category": "documentation",
+        "category": "architecture",
         "repo": [
             "IntrusionBackend"
         ],
         "query": "If tomorrow i built a new model for intrusion backend how would i add it?",
-        "path": "README.md"
+        "path": "predict.py",
+        "ground_truth": "To add a new model in predict.py, you need to: 1) Load the model globally (e.g., via joblib or torch.load) at the top of the file. 2) Create a helper wrapper function (e.g., _predict_newmodel) that handles data scaling, model inference, and latency tracking. 3) Call this wrapper inside the main predict_attack and predict_attack_by_idx pipelines, appending its prediction and latency to the final result dictionary."
     },
     {
         "id": 17,
@@ -150,7 +166,8 @@
             "IntrusionBackend"
         ],
         "query": "What is the architecture of Intrusion Backend and how do the diff modules interact",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "The Intrusion Backend uses a hierarchical machine learning pipeline. It first passes network flow data through Unsupervised Anomaly Detection models (Autoencoders, Isolation Forests). If an anomaly is detected, it acts as a 'Veto' logic, triggering Supervised Classification models (LightGBM, XGBoost, FFNN) to make the final determination."
     },
     {
         "id": 18,
@@ -159,7 +176,8 @@
             "CaptchaOCR"
         ],
         "query": "How do I install CaptchaOCR?",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "To install the dependencies for CaptchaOCR, use pip to install PyTorch with CUDA support (e.g., pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128), and then install the required Python packages by running pip install captcha pandas pillow."
     },
     {
         "id": 19,
@@ -168,7 +186,8 @@
             "IntrusionBackend"
         ],
         "query": "What Python version does IntrusionBackend require?",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "The IntrusionBackend README does not explicitly state a required Python version, though it displays a generic Python badge and relies on modern libraries like FastAPI, Polars, and PyTorch."
     },
     {
         "id": 20,
@@ -177,7 +196,8 @@
             "IntrusionBackend"
         ],
         "query": "How do I contribute to IntrusionBackend?",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "There are no specific contribution guidelines provided in the IntrusionBackend README."
     },
     {
         "id": 21,
@@ -186,7 +206,8 @@
             "CaptchaOCR"
         ],
         "query": "Which project uses pytorch",
-        "path": "train.py"
+        "path": "train.py",
+        "ground_truth": "The CaptchaOCR project uses PyTorch, specifically in the train.py pipeline and model architecture."
     },
     {
         "id": 22,
@@ -195,7 +216,8 @@
             "HermesGPT"
         ],
         "query": "I wanted to mass send mails do i have a project for that?",
-        "path": "hermesgpt.py"
+        "path": "hermesgpt.py",
+        "ground_truth": "Yes, the HermesGPT project (hermesgpt.py) automates mass sending of cold emails using the Gmail API and Gemini."
     },
     {
         "id": 23,
@@ -204,7 +226,8 @@
             "IntrusionBackend"
         ],
         "query": "I wanna build a fastapi for this new Pothole scanning project im building do i have a project i can use for reference",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "Yes, you can use the IntrusionBackend project (router.py) as a reference. It is a fully featured FastAPI application with routing, token authentication, and WebSockets."
     },
     {
         "id": 24,
@@ -213,7 +236,8 @@
             "CaptchaOCR"
         ],
         "query": "I need an OCR project.",
-        "path": "README.md"
+        "path": "README.md",
+        "ground_truth": "The CaptchaOCR project is a PyTorch-based OCR system that uses a CRNN architecture to recognize text in images."
     },
     {
         "id": 25,
@@ -222,7 +246,8 @@
             "IntrusionBackend"
         ],
         "query": "I need a FastAPI template.",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "The IntrusionBackend project serves as an excellent FastAPI template. Its router.py demonstrates API routing, middleware integration, token-based authentication, and WebSocket streaming."
     },
     {
         "id": 26,
@@ -231,7 +256,8 @@
             "HermesGPT"
         ],
         "query": "I need an email automation project.",
-        "path": "hermesgpt.py"
+        "path": "hermesgpt.py",
+        "ground_truth": "The HermesGPT project (hermesgpt.py) is an email automation system that generates personalized cold emails using AI and sends them via the Gmail API."
     },
     {
         "id": 27,
@@ -240,7 +266,8 @@
             "IntrusionBackend"
         ],
         "query": "I need a websocket implementation.",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "You can find a WebSocket implementation in the IntrusionBackend project within router.py, specifically under the /ws/stream endpoint which streams batched prediction data in real-time."
     },
     {
         "id": 28,
@@ -249,7 +276,8 @@
             "CaptchaOCR"
         ],
         "query": "I need a PyTorch training pipeline.",
-        "path": "train.py"
+        "path": "train.py",
+        "ground_truth": "The CaptchaOCR project contains a complete PyTorch training pipeline in train.py. It includes dataset loading, epoch-based training, CTC loss calculation, learning rate scheduling, and validation logic."
     },
     {
         "id": 29,
@@ -258,7 +286,8 @@
             "IntrusionBackend"
         ],
         "query": "What are the allowed Origins for my IntrusionBackend Project?",
-        "path": "cors.py"
+        "path": "cors.py",
+        "ground_truth": "In the IntrusionBackend project, the allowed CORS origins configured in cors.py are: https://mohakapoor.in, https://sisyphus.mohakapoor.in, http://mohakapoor.in, http://sisyphus.mohakapoor.in, and http://localhost:8000."
     },
     {
         "id": 30,
@@ -267,7 +296,8 @@
             "IntrusionBackend"
         ],
         "query": "Where are CORS origins configured?",
-        "path": "cors.py"
+        "path": "cors.py",
+        "ground_truth": "CORS origins are configured in the cors.py file within the IntrusionBackend project using FastAPI CORSMiddleware."
     },
     {
         "id": 31,
@@ -276,7 +306,8 @@
             "IntrusionBackend"
         ],
         "query": "Where are environment variables loaded? in IntrusionBackend Project",
-        "path": "docker-compose.yml"
+        "path": "docker-compose.yml",
+        "ground_truth": "In the IntrusionBackend project, environment variables are loaded in docker-compose.yml via the env_file: directive, which points to the .env file."
     },
     {
         "id": 32,
@@ -285,14 +316,16 @@
             "IntrusionBackend"
         ],
         "query": "Where is Docker configured for the IntrusionBackend?",
-        "path": "dockerfile"
+        "path": "dockerfile",
+        "ground_truth": "Docker is configured in the dockerfile for the IntrusionBackend. It uses the python:3.11-slim base image, installs system dependencies (like libgomp1), copies the code, installs Python packages from requirements.txt, and sets CMD ['python', 'router.py'] to start the application."
     },
     {
         "id": 33,
         "category": "configuration",
         "repo": [],
         "query": "Where is GitHub Actions defined?",
-        "path": null
+        "path": null,
+        "ground_truth": "GitHub Actions configurations are typically found in a .github/workflows/ directory, but there are no GitHub Actions workflows defined in the current codebase."
     },
     {
         "id": 34,
@@ -301,7 +334,8 @@
             "IntrusionBackend"
         ],
         "query": "Where is preprocessing and scaling configured for my models?",
-        "path": "utils.py"
+        "path": "utils.py",
+        "ground_truth": "Preprocessing and scaling are configured in utils.py. The file handles missing/infinite values, drops constant or redundant columns, downcasts data types, and applies scaling using pre-trained MinMaxScaler (scale_unsupervised) and StandardScaler/PCA (scale_supervised)."
     },
     {
         "id": 35,
@@ -310,7 +344,8 @@
             "HermesGPT"
         ],
         "query": "Do i have rate limits implemented somewhere for emails",
-        "path": "hermesgpt.py"
+        "path": "hermesgpt.py",
+        "ground_truth": "Yes, rate limiting is implemented in hermesgpt.py within the batch_mailing function using a random time.sleep(random.randint(30,120)) between sending each email to avoid triggering spam filters or hitting API limits."
     },
     {
         "id": 36,
@@ -319,7 +354,8 @@
             "CaptchaOCR"
         ],
         "query": "How does the inference work?",
-        "path": "inference.py"
+        "path": "inference.py",
+        "ground_truth": "Inference works by loading the trained CRNN model checkpoint, preprocessing the image to the target tensor size, passing it through the model to get logits, and then using greedy CTC decoding to generate the final text prediction."
     },
     {
         "id": 37,
@@ -328,7 +364,8 @@
             "IntrusionBackend"
         ],
         "query": "How does live websocketing work in my projects",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "Live websocketing works in router.py through the /ws/stream endpoint. Once the client connects and authenticates with a JSON payload, the server starts an asynchronous loop that evaluates rows of network data in batches, returning real-time predictions, latencies, and accuracy statistics back to the client."
     },
     {
         "id": 38,
@@ -337,7 +374,8 @@
             "CaptchaOCR"
         ],
         "query": "How does an image travel from upload to prediction?",
-        "path": "inference.py"
+        "path": "inference.py",
+        "ground_truth": "An image travels from upload to prediction by first being preprocessed (loaded via OpenCV, resized to 60x256, normalized, and converted to a tensor), then passed into the CRNN model. The model outputs logits, which are finally converted into a readable text string using CTC greedy decoding."
     },
     {
         "id": 39,
@@ -346,7 +384,8 @@
             "IntrusionBackend"
         ],
         "query": "How are websocket clients managed?",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "WebSocket clients are managed in router.py by accepting the connection with await websocket.accept(), checking for a valid authentication token in the first received JSON message, and keeping the connection open in a loop to stream data until completion or a WebSocketDisconnect exception occurs, at which point the connection is closed safely."
     },
     {
         "id": 40,
@@ -355,35 +394,40 @@
             "CaptchaOCR"
         ],
         "query": "How does the training pipeline work in CaptchaOCR?",
-        "path": "train.py"
+        "path": "train.py",
+        "ground_truth": "The training pipeline in train.py loads the PyTorch CaptchaDataset via DataLoaders. It initializes the CRNN model, CTCLoss, AdamW optimizer, and OneCycleLR scheduler. The pipeline runs epoch loops containing forward/backward passes, calculates training and validation loss, handles early stopping, saves checkpoints, and generates metric plots."
     },
     {
         "id": 41,
         "category": "negative",
         "repo": [],
         "query": "Do I have a Rust project?",
-        "path": null
+        "path": null,
+        "ground_truth": "No, there are no Rust projects in the current repository portfolio."
     },
     {
         "id": 42,
         "category": "negative",
         "repo": [],
         "query": "Do I use Kubernetes?",
-        "path": null
+        "path": null,
+        "ground_truth": "No, Kubernetes is not used in the current repositories. Deployment configurations use Docker and Docker Compose."
     },
     {
         "id": 43,
         "category": "negative",
         "repo": [],
         "query": "Do I use Redis Streams?",
-        "path": null
+        "path": null,
+        "ground_truth": "No, Redis Streams are not used in the current projects."
     },
     {
         "id": 44,
         "category": "negative",
         "repo": [],
         "query": "Have I implemented GraphQL?",
-        "path": null
+        "path": null,
+        "ground_truth": "No, GraphQL has not been implemented. The APIs are RESTful (e.g., using FastAPI)."
     },
     {
         "id": 45,
@@ -392,7 +436,8 @@
             "IntrusionBackend"
         ],
         "query": "Which of my repositories use FastAPI?",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "The IntrusionBackend repository uses FastAPI for its REST API and WebSocket implementation, specifically defined in router.py."
     },
     {
         "id": 46,
@@ -401,7 +446,8 @@
             "HermesGPT"
         ],
         "query": "Which projects use Gemini?",
-        "path": "hermesgpt.py"
+        "path": "hermesgpt.py",
+        "ground_truth": "The HermesGPT project uses the Gemini API (gemini-2.0-flash) via the google.generativeai package to automate cold email generation."
     },
     {
         "id": 47,
@@ -411,7 +457,8 @@
             "IntrusionBackend"
         ],
         "query": "Which projects use PyTorch?",
-        "path": "train.py"
+        "path": "train.py",
+        "ground_truth": "The CaptchaOCR project uses PyTorch heavily for its CRNN model architecture, custom Dataset, and training pipeline (train.py). The IntrusionBackend also uses PyTorch for its Autoencoder and FFNN models."
     },
     {
         "id": 48,
@@ -420,7 +467,8 @@
             "IntrusionBackend"
         ],
         "query": "Which projects expose REST APIs?",
-        "path": "router.py"
+        "path": "router.py",
+        "ground_truth": "The IntrusionBackend project exposes REST APIs using FastAPI in router.py."
     },
     {
         "id": 49,
@@ -429,7 +477,8 @@
             "CaptchaOCR"
         ],
         "query": "generateCaptcha",
-        "path": "src/generateCaptcha.py"
+        "path": "src/generateCaptcha.py",
+        "ground_truth": "generateCaptcha is a function located in src/generateCaptcha.py within the CaptchaOCR project. It generates synthetic CAPTCHA images with configurable text, fonts, and augmentations."
     },
     {
         "id": 50,
@@ -438,7 +487,8 @@
             "CaptchaOCR"
         ],
         "query": "CaptchaDataset Generation",
-        "path": "src/data.py"
+        "path": "src/data.py",
+        "ground_truth": "The synthetic CAPTCHA dataset generation pipeline is orchestrated in src/data.py, which creates labeled training, validation, and test datasets of images using the render_with_variation function."
     },
     {
         "id": 51,
@@ -447,7 +497,8 @@
             "IntrusionBackend"
         ],
         "query": "predict_intrusion",
-        "path": "predict.py"
+        "path": "predict.py",
+        "ground_truth": "There isn't a function explicitly named predict_intrusion, but the primary inference pipelines in predict.py are predict_attack and predict_attack_by_idx, which evaluate network flow data against multiple intrusion detection models."
     },
     {
         "id": 52,
@@ -456,6 +507,7 @@
             "HermesGPT"
         ],
         "query": "HermesGPT",
-        "path": "hermesgpt.py"
+        "path": "hermesgpt.py",
+        "ground_truth": "HermesGPT is an email automation tool found in hermesgpt.py. It uses the Gemini API to parse resumes and generate personalized cold emails for recruiters, sending them automatically via the Gmail API."
     }
 ]
