@@ -55,6 +55,22 @@ def main():
                 except Exception as e:
                     print(f"  Error processing {file_rel_path}: {e}")
                     
+    print("\nGenerating global portfolio graph...")
+    try:
+        from src.github.repo_map import build_portfolio_graph
+        from src.indexing.chroma_store import delete_file, upsert
+        
+        repos_dir = Path("knowledge_base/repos")
+        graph_file = Path("knowledge_base/portfolio_graph.md")
+        graph_chunk = build_portfolio_graph(repos_dir, output_file=graph_file)
+        
+        if graph_chunk:
+            delete_file("global", "portfolio_graph")
+            upsert([graph_chunk])
+            print("  Successfully generated and indexed portfolio graph.")
+    except Exception as e:
+        print(f"  Failed to generate portfolio graph: {e}")
+        
     elapsed = time.time() - start_time
     
     print("\n----------------------------------")
