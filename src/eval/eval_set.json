@@ -6,8 +6,8 @@
             "CaptchaOCR"
         ],
         "query": "Where is synthetic Captcha Dataset class written?",
-        "path": "src/generateCaptcha.py",
-        "ground_truth": "The utility functions for generating synthetic CAPTCHA images are located in src/generateCaptcha.py."
+        "path": "src/captcha_dataset.py",
+        "ground_truth": "The CaptchaDataset class for loading synthetic CAPTCHA images is defined in src/captcha_dataset.py."
     },
     {
         "id": 2,
@@ -16,8 +16,8 @@
             "CaptchaOCR"
         ],
         "query": "Where are different image transformations implemented",
-        "path": "src/data.py",
-        "ground_truth": "Image transformations and augmentations, such as perspective warping, interference lines, blurring, and JPEG artifacts, are implemented in src/data.py."
+        "path": "src/generateCaptcha.py",
+        "ground_truth": "Image transformations and augmentations, such as perspective warping, interference lines, blurring, and JPEG artifacts, are primarily implemented in src/generateCaptcha.py (and mirrored in src/data.py for dataset generation)."
     },
     {
         "id": 3,
@@ -76,8 +76,8 @@
             "CaptchaOCR"
         ],
         "query": "How is vocabulary generated and can be made better",
-        "path": "src/generateCaptcha.py",
-        "ground_truth": "In src/generateCaptcha.py, the vocabulary is defined statically using string.ascii_letters + string.digits. It generates random alphanumeric strings. It could be improved by injecting real dictionary words or incorporating special characters to better simulate real-world captchas."
+        "path": "src/vocab.py",
+        "ground_truth": "For the OCR model, the vocabulary is generated statically in src/vocab.py by creating character-to-index mappings (itos and stoi) from config.py's character set. It could be made better by implementing sub-word tokenization (like BPE) instead of character-level, or by adding support for special symbols/punctuation."
     },
     {
         "id": 9,
@@ -186,8 +186,8 @@
             "IntrusionBackend"
         ],
         "query": "What Python version does IntrusionBackend require?",
-        "path": "README.md",
-        "ground_truth": "The IntrusionBackend README does not explicitly state a required Python version, though it displays a generic Python badge and relies on modern libraries like FastAPI, Polars, and PyTorch."
+        "path": "dockerfile",
+        "ground_truth": "While the README only shows a generic Python badge, the dockerfile explicitly requires python:3.11-slim as its base image."
     },
     {
         "id": 20,
@@ -203,11 +203,12 @@
         "id": 21,
         "category": "repository_recommendation",
         "repo": [
-            "CaptchaOCR"
+            "CaptchaOCR",
+            "IntrusionBackend"
         ],
         "query": "Which project uses pytorch",
         "path": "train.py",
-        "ground_truth": "The CaptchaOCR project uses PyTorch, specifically in the train.py pipeline and model architecture."
+        "ground_truth": "Both CaptchaOCR and IntrusionBackend use PyTorch. CaptchaOCR uses it heavily for its CRNN model architecture and training pipeline. IntrusionBackend uses PyTorch for its Autoencoder and FFNN models."
     },
     {
         "id": 22,
@@ -476,9 +477,9 @@
         "repo": [
             "CaptchaOCR"
         ],
-        "query": "generateCaptcha",
+        "query": "generate_captcha",
         "path": "src/generateCaptcha.py",
-        "ground_truth": "generateCaptcha is a function located in src/generateCaptcha.py within the CaptchaOCR project. It generates synthetic CAPTCHA images with configurable text, fonts, and augmentations."
+        "ground_truth": "generate_captcha is a function located in src/generateCaptcha.py within the CaptchaOCR project. It generates synthetic CAPTCHA images with configurable text, fonts, and augmentations."
     },
     {
         "id": 50,
