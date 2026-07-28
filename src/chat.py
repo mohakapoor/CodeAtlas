@@ -77,7 +77,7 @@ class CodeAtlasChat:
     """
     Orchestrator that handles the MVP RAG pipeline.
     """
-    def __init__(self, model_name="gemini-2.5-flash"):
+    def __init__(self, model_name="gemini-3.1-flash-lite"):
         dotenv.load_dotenv()
         
         self.llm = init_chat_model(
@@ -135,4 +135,4 @@ class CodeAtlasChat:
         self.session.add_user(query)
         self.session.add_assistant(answer)
         
-        return {"answer": answer, "sources": sources}
+        return {"answer": answer, "response": answer, "sources": sources}
