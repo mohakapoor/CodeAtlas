@@ -74,3 +74,15 @@ def similarity_search(
         k=k,
         filter=filter,
     )
+
+def get_all_documents() -> list:
+    """
+    Returns all documents in the ChromaDB collection as Langchain Document objects.
+    """
+    from langchain_core.documents import Document
+    data = _vectorstore.get()
+    docs = []
+    if data and "documents" in data and "metadatas" in data:
+        for text, meta in zip(data["documents"], data["metadatas"]):
+            docs.append(Document(page_content=text, metadata=meta))
+    return docs
