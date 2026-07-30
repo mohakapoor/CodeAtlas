@@ -1,6 +1,6 @@
 from pathlib import Path
 from src.parsing.registry import get_parser
-from src.indexing.chroma_store import upsert, delete_file
+from src.indexing.qdrant_store import upsert, delete_file
 from src.ignore_list import IGNORE_DIRS, IGNORE_EXTENSIONS, IGNORE_FILES
 
 BATCH_SIZE = 100
@@ -34,7 +34,7 @@ def index_file(repo_name: str, file_path: Path, reindex: bool = False) -> tuple[
         return 0, 0
 
     try:
-        # 1. Optionally delete old chunks from ChromaDB to avoid duplicates
+        # 1. Optionally delete old chunks from Qdrant to avoid duplicates
         if reindex:
             delete_file(repo_name, file_path.as_posix())
         
@@ -54,7 +54,7 @@ def index_file(repo_name: str, file_path: Path, reindex: bool = False) -> tuple[
 
 def index_repository(repo_path: Path) -> tuple[int, int]:
     """
-    Walks a single cloned repo, parses it, and stores the chunks in Chroma.
+    Walks a single cloned repo, parses it, and stores the chunks in Qdrant.
     """
     if not repo_path.exists() or not repo_path.is_dir():
         print(f"Repository path {repo_path} is invalid.")
@@ -79,7 +79,7 @@ def index_repository(repo_path: Path) -> tuple[int, int]:
             except Exception as e:
                 print(f"  Failed to parse {file_path.name}: {e}")
                 
-    # 2. Batch upsert into ChromaDB
+    # 2. Batch upsert into Qdrant
     chunks_indexed = 0
     
     for i in range(0, len(all_chunks), BATCH_SIZE):
