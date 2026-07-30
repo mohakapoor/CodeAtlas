@@ -20,6 +20,19 @@ _sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
 # 3. Initialize the Qdrant Client (saving to local folder)
 _client = QdrantClient(path="knowledge_base/qdrant")
 
+# 4. Ensure the collection exists before creating the VectorStore
+if not _client.collection_exists("code_atlas"):
+    _client.create_collection(
+        collection_name="code_atlas",
+        vectors_config=models.VectorParams(
+            size=384,  # all-MiniLM-L6-v2 output dimension
+            distance=models.Distance.COSINE
+        ),
+        sparse_vectors_config={
+            "langchain-sparse": models.SparseVectorParams() # Default sparse vector name for langchain
+        }
+    )
+
 _vectorstore = QdrantVectorStore(
     client=_client,
     collection_name="code_atlas",
@@ -40,9 +53,13 @@ def upsert(chunks: list[Chunk]) -> int:
     if not chunks:
         return 0
         
+    import uuid
+    
     texts = [c.content for c in chunks]
     metadatas = [c.metadata for c in chunks]
-    ids = [c.id for c in chunks]
+    
+    # Convert custom string IDs into valid Qdrant UUIDs deterministically
+    ids = [str(uuid.uuid5(uuid.NAMESPACE_DNS, c.id)) for c in chunks]
     
     try:
         _vectorstore.add_texts(
