@@ -64,11 +64,7 @@ class HybridRetriever(BaseRetriever):
     def __init__(self):
         super().__init__()
         from sentence_transformers import CrossEncoder
-        
-        # Load a lightweight, highly accurate cross-encoder directly
         self.cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-        
-        # Qdrant naturally does Hybrid Search because of how we initialized it!
         self.base_retriever = self.vectorstore.as_retriever(search_kwargs={"k": 15})
 
     def retrieve(self, query: str, k: int = 5):
@@ -79,11 +75,10 @@ class HybridRetriever(BaseRetriever):
         if not docs:
             return []
             
-        # Neural Reranking using raw sentence-transformers
+        # Neural Reranking
         pairs = [[query, doc.page_content] for doc in docs]
         scores = self.cross_encoder.predict(pairs)
         
-        # Sort docs by their predicted relevance score
         scored_docs = list(zip(scores, docs))
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         

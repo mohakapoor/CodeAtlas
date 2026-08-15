@@ -1,8 +1,8 @@
 import os
 import dotenv
 from pathlib import Path
-from src.indexing.chroma_store import get_vectorstore
-from src.retrieval.retrievers import SplitAndCombineRetriever
+from src.indexing.qdrant_store import get_vectorstore
+from src.retrieval.retrievers import HybridRetriever
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -11,9 +11,8 @@ from langchain_core.output_parsers import StrOutputParser
 def run_interactive_rag():
     dotenv.load_dotenv()
     
-    print("Initializing Split & Combine Retriever...")
-    # Fetch 3 code chunks and 2 documentation chunks
-    base_retriever = SplitAndCombineRetriever(code_k=3, doc_k=2)
+    print("Initializing Hybrid Retriever (Qdrant + CrossEncoder)...")
+    base_retriever = HybridRetriever()
     
     from langchain_core.runnables import RunnableLambda
     retriever = RunnableLambda(lambda q: base_retriever.retrieve(q))
