@@ -61,10 +61,6 @@ class SplitAndCombineRetriever(BaseRetriever):
         return code_results + doc_results
 
 class HybridRetriever(BaseRetriever):
-    """
-    Native Qdrant Hybrid Search (Dense + Sparse + RRF) 
-    wrapped with a HuggingFace CrossEncoder for final neural reranking.
-    """
     def __init__(self):
         super().__init__()
         from sentence_transformers import CrossEncoder
@@ -95,10 +91,6 @@ class HybridRetriever(BaseRetriever):
         return [doc for score, doc in scored_docs[:k]]
 
 class HybridSplitRetriever(BaseRetriever):
-    """
-    Combines the forced diversity of SplitAndCombine (Code + Docs) 
-    with the accuracy of Qdrant Hybrid Search and CrossEncoder reranking.
-    """
     def __init__(self, code_k: int = 3, doc_k: int = 2):
         super().__init__()
         from sentence_transformers import CrossEncoder
@@ -113,7 +105,7 @@ class HybridSplitRetriever(BaseRetriever):
         
         results = []
         
-        # 1. Code Retrieval Pipeline (Hybrid Search + CrossEncoder)
+        # Code Retrieval
         if self.code_k > 0:
             code_filter = models.Filter(
                 must_not=[
@@ -123,8 +115,7 @@ class HybridSplitRetriever(BaseRetriever):
                     )
                 ]
             )
-            # Fetch a broad net (e.g. 15 docs) to rerank
-            fetch_code_k = max(15, self.code_k * 3)
+            fetch_code_k = 15
             self.base_retriever.search_kwargs = {"k": fetch_code_k, "filter": code_filter}
             code_docs = self.base_retriever.invoke(query)
             
@@ -135,7 +126,7 @@ class HybridSplitRetriever(BaseRetriever):
                 scored.sort(key=lambda x: x[0], reverse=True)
                 results.extend([doc for score, doc in scored[:self.code_k]])
                 
-        # 2. Doc Retrieval Pipeline (Hybrid Search + CrossEncoder)
+        # Doc Retrieval
         if self.doc_k > 0:
             doc_filter = models.Filter(
                 must=[
@@ -145,7 +136,7 @@ class HybridSplitRetriever(BaseRetriever):
                     )
                 ]
             )
-            fetch_doc_k = max(15, self.doc_k * 3)
+            fetch_doc_k = 15
             self.base_retriever.search_kwargs = {"k": fetch_doc_k, "filter": doc_filter}
             doc_docs = self.base_retriever.invoke(query)
             
