@@ -22,7 +22,7 @@ def main():
     total_repos = len(sync_results)
                 
     from src.github.manifest import update_manifest_queue
-    from src.indexing.chroma_store import delete_file
+    from src.indexing.qdrant_store import delete_file
     
     for result in sync_results:
         print(f"\nEvaluating ingestion for {result.repo_name}...")
@@ -58,7 +58,7 @@ def main():
     print("\nGenerating global portfolio graph...")
     try:
         from src.github.repo_map import build_portfolio_graph
-        from src.indexing.chroma_store import delete_file, upsert
+        from src.indexing.qdrant_store import delete_file, upsert
         
         repos_dir = Path("knowledge_base/repos")
         graph_file = Path("knowledge_base/portfolio_graph.md")
