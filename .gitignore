@@ -11,3 +11,6 @@ wheels/
 .env
 knowledge_base/
 project_details.md
+
+
+src/eval/dataset
