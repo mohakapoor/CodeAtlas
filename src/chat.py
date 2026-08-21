@@ -1,7 +1,7 @@
 import dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, BaseMessage
-from src.retrieval.retrievers import HybridSplitRetriever
+from src.retrieval.retrievers import GlobalRerankRetriever
 
 class ChatSession:
     """Manages conversational memory with a strict limit."""
@@ -86,7 +86,7 @@ class CodeAtlasChat:
             temperature=0.2,
             streaming=False,
         )
-        self.retriever = HybridSplitRetriever(code_k=3, doc_k=2)
+        self.retriever = GlobalRerankRetriever()
         self.session = ChatSession(max_history=10)
 
     def ask(self, query: str) -> dict:
