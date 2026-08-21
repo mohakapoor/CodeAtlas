@@ -110,9 +110,7 @@ class HybridSplitRetriever(BaseRetriever):
                     )
                 ]
             )
-            fetch_code_k = 15
-            self.base_retriever.search_kwargs = {"k": fetch_code_k, "filter": code_filter}
-            code_docs = self.base_retriever.invoke(query)
+            code_docs = self.vectorstore.similarity_search(query, k=15, filter=code_filter)
             
             if code_docs:
                 pairs = [[query, doc.page_content] for doc in code_docs]
@@ -131,9 +129,7 @@ class HybridSplitRetriever(BaseRetriever):
                     )
                 ]
             )
-            fetch_doc_k = 15
-            self.base_retriever.search_kwargs = {"k": fetch_doc_k, "filter": doc_filter}
-            doc_docs = self.base_retriever.invoke(query)
+            doc_docs = self.vectorstore.similarity_search(query, k=15, filter=doc_filter)
             
             if doc_docs:
                 pairs = [[query, doc.page_content] for doc in doc_docs]
@@ -144,3 +140,48 @@ class HybridSplitRetriever(BaseRetriever):
                 
         return results
 
+
+class GlobalRerankRetriever(BaseRetriever):
+
+    def __init__(self):
+        super().__init__()
+        from sentence_transformers import CrossEncoder
+        
+        self.cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+        self.base_retriever = self.vectorstore.as_retriever()
+
+    def retrieve(self, query: str, k: int = 5):
+        from qdrant_client.http import models
+        
+        #Fetch Code Candidates
+        code_filter = models.Filter(
+            must_not=[
+                models.FieldCondition(
+                    key="metadata.language",
+                    match=models.MatchAny(any=["markdown", "text"])
+                )
+            ]
+        )
+        code_candidates = self.vectorstore.similarity_search(query, k=15, filter=code_filter)
+        
+        #Fetch Doc Candidates
+        doc_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="metadata.language",
+                    match=models.MatchAny(any=["markdown", "text"])
+                )
+            ]
+        )
+        doc_candidates = self.vectorstore.similarity_search(query, k=15, filter=doc_filter)
+        combined_pool = code_candidates + doc_candidates 
+        if not combined_pool:
+            return []
+        pairs = [[query, doc.page_content] for doc in combined_pool]
+        scores = self.cross_encoder.predict(pairs)
+        
+        #Global Sort & Slice
+        scored = list(zip(scores, combined_pool))
+        scored.sort(key=lambda x: x[0], reverse=True)
+        
+        return [doc for score, doc in scored[:k]]
